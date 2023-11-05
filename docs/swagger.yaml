@@ -1,0 +1,45 @@
+basePath: /
+definitions:
+  auth.LoginData:
+    properties:
+      email:
+        type: string
+      password:
+        type: string
+    type: object
+  auth.LoginResponseOK:
+    properties:
+      token:
+        type: string
+    type: object
+host: localhost:8080
+info:
+  contact: {}
+  description: service api for gostudy using gin
+  title: tag Service Api
+  version: "1.0"
+paths:
+  /auth/login:
+    post:
+      consumes:
+      - application/json
+      description: Verifica datos en la base de datos y devuelve un JWT en caso de
+        éxito
+      parameters:
+      - description: datos del inicio de sesion
+        in: body
+        name: data
+        required: true
+        schema:
+          $ref: '#/definitions/auth.LoginData'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/auth.LoginResponseOK'
+      summary: Login Function
+      tags:
+      - Users
+swagger: "2.0"
