@@ -32,6 +32,9 @@ func CreateTask(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid project"})
 		return
 	}
+	if !(utils.ValidateIntFields(c, "projectid", int(task.ProjectID))) {
+		return
+	}
 
 	if !utils.ValidateRequiredStringFields(c, "title", task.Title) || !utils.ValidateRequiredStringFields(c, "status", task.Status) || !utils.ValidateRequiredStringFields(c, "tags", task.Tags) || !utils.ValidateRequiredStringFields(c, "description", task.Description) || !utils.ValidateRequiredTimeFields(c, "startDate", task.StartDate) || !utils.ValidateRequiredTimeFields(c, "endDate", task.EndDate) {
 		return
@@ -48,6 +51,7 @@ func CreateTask(c *gin.Context) {
 
 	taskprojects = append(taskprojects, models.TaskProject{TaskID: task.ID, ProjectID: task.ProjectID})
 	if err := database.DB.Create(&taskprojects).Error; err != nil {
+		database.DB.Delete(&task)
 		c.JSON(http.StatusBadRequest, gin.H{"error": "error creating task in taskprojects"})
 		return
 	}
@@ -90,7 +94,5 @@ func GetTask(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "can not find task"})
 		return
 	}
-
 	c.JSON(http.StatusOK, gin.H{"data": task})
-
 }

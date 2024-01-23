@@ -22,6 +22,13 @@ func ValidateRequiredTimeFields(c *gin.Context, field string, value time.Time) b
 	}
 	return true
 }
+func ValidateIntFields(c *gin.Context, field string, value int) bool {
+	if value == 0 {
+		c.JSON(http.StatusBadRequest, gin.H{"error": field + " is required"})
+		return false
+	}
+	return true
+}
 
 func ValidateTimeFields(c *gin.Context, field1 time.Time, field2 time.Time, field3 time.Time) bool {
 

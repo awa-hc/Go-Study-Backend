@@ -9,5 +9,6 @@ type Users struct {
 	Password   string
 	ImgProfile string
 	Username   string `gorm:"unique"`
-	UserRole   string
+	UserRole   string `default:"user"`
+	// EmailVerified bool   `default:"false"`
 }

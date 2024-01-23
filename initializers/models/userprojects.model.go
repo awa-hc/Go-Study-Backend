@@ -9,3 +9,4 @@ type UserProject struct {
 	User      Users    `gorm:"foreignKey:UserID"`
 	Project   Projects `gorm:"foreignKey:ProjectID"`
 }
+ 

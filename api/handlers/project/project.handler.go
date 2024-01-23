@@ -2,28 +2,12 @@ package handlers
 
 import (
 	"net/http"
-	"time"
 
+	"github.com/awa-hc/backend/api/utils"
 	"github.com/awa-hc/backend/initializers/database"
 	"github.com/awa-hc/backend/initializers/models"
 	"github.com/gin-gonic/gin"
 )
-
-func validateRequiredStringFields(c *gin.Context, field, value string) bool {
-	if value == "" {
-		c.JSON(http.StatusBadRequest, gin.H{"error": field + " is required"})
-		return false
-	}
-	return true
-}
-
-func validateRequiredTimeFields(c *gin.Context, field string, value time.Time) bool {
-	if value.IsZero() {
-		c.JSON(http.StatusBadRequest, gin.H{"error": field + " is required"})
-		return false
-	}
-	return true
-}
 
 func CreateProject(c *gin.Context) {
 	var project models.Projects
@@ -42,22 +26,11 @@ func CreateProject(c *gin.Context) {
 		return
 	}
 
-	if !validateRequiredStringFields(c, "title", project.Title) || !validateRequiredStringFields(c, "tags", project.Tags) || !validateRequiredStringFields(c, "company", project.Company) || !validateRequiredStringFields(c, "description", project.Description) || !validateRequiredTimeFields(c, "startDate", project.StartDate) || !validateRequiredTimeFields(c, "endDate", project.EndDate) {
+	if !utils.ValidateRequiredStringFields(c, "title", project.Title) || !utils.ValidateRequiredStringFields(c, "tags", project.Tags) || !utils.ValidateRequiredStringFields(c, "company", project.Company) || !utils.ValidateRequiredStringFields(c, "description", project.Description) || !utils.ValidateRequiredTimeFields(c, "startDate", project.StartDate) || !utils.ValidateRequiredTimeFields(c, "endDate", project.EndDate) {
 		return
 	}
 
-	if (project.TestDate).Unix() < (project.StartDate).Unix() {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "test date must be after start date"})
-		return
-	}
-
-	if (project.EndDate).Unix() < (project.TestDate).Unix() {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "end date must be after test date"})
-		return
-	}
-
-	if (project.EndDate).Unix() < (project.StartDate).Unix() {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "end date must be after start date"})
+	if !utils.ValidateTimeFields(c, project.StartDate, project.TestDate, project.EndDate) {
 		return
 	}
 
@@ -71,7 +44,8 @@ func CreateProject(c *gin.Context) {
 	userProject.ProjectID = project.ID
 
 	if err := database.DB.Create(&userProject).Error; err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "failed to create the project on userproject table"})
+		database.DB.Delete(&project)
+		c.JSON(http.StatusBadRequest, gin.H{"error": "failed to create the project on userproject"})
 		return
 	}
 
@@ -120,7 +94,7 @@ func DeleteProject(c *gin.Context) {
 		return
 	}
 
-	if !validateRequiredStringFields(c, "confirmation", input.Confirmation) {
+	if !utils.ValidateRequiredStringFields(c, "confirmation", input.Confirmation) {
 		return
 	}
 

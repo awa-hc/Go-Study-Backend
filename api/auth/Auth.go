@@ -54,8 +54,7 @@ func SignUp(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, gin.H{"message": "user created successfully", "user": user})
-
+	c.JSON(http.StatusOK, gin.H{"message": "user created successfully"})
 }
 
 type LoginData struct {
@@ -104,8 +103,9 @@ func Login(c *gin.Context) {
 	}
 
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
-		"sub": user.ID,
-		"exp": time.Now().Add(time.Hour * 24 * 30).Unix(),
+		"sub":  user.ID,
+		"role": user.UserRole,
+		"exp":  time.Now().Add(time.Hour * 24 * 30).Unix(),
 	})
 
 	tokenString, err := token.SignedString([]byte(os.Getenv("SECRET")))
@@ -120,9 +120,30 @@ func Login(c *gin.Context) {
 
 }
 
+// func VerifyEmail(c *gin.Context) {
+// 	email := c.Param("email")
+// 	var user models.Users
+
+// 	if err := database.DB.First(&user, "email = ?", email).Error; err != nil {
+// 		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid email"})
+// 		return
+// 	}
+
+// 	if user.EmailVerified {
+// 		c.JSON(http.StatusBadRequest, gin.H{"error": "email already verified"})
+// 		return
+// 	}
+// 	if !user.EmailVerified {
+// 		user.EmailVerified = true
+// 		database.DB.Save(&user)
+// 		c.JSON(http.StatusOK, gin.H{"message": "email verified"})
+// 		return
+// 	}
+
+// }
+
 func Validate(c *gin.Context) {
 	user, _ := c.Get("user")
-	id := user.(models.Users).ID
-
-	c.JSON(http.StatusOK, gin.H{"user": user, "id": id})
+	// id := user.(models.Users).ID
+	c.JSON(http.StatusOK, gin.H{"user": user})
 }
